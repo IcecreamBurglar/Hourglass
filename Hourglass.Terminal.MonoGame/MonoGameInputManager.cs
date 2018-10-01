@@ -160,7 +160,7 @@ namespace Hourglass.Terminal.Input
                 }
                 else if(curWord.StartIndex > _inputWatcher.CaretPosition)
                 {
-                    return curWord;
+                    //return curWord;
                 }
                 if (curWord.EndIndex < _inputWatcher.CaretPosition)
                 {
