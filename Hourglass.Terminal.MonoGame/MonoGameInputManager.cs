@@ -148,6 +148,7 @@ namespace Hourglass.Terminal.Input
                 return words.Last();
             }
 
+            var leftNeighbor = Word.Empty;
             for (int i = 0; i < words.Length; i++)
             {
                 var curWord = words[i];
@@ -155,9 +156,13 @@ namespace Hourglass.Terminal.Input
                 {
                     return curWord;
                 }
+                else if(curWord.EndIndex < _inputWatcher.CaretPosition)
+                {
+                    leftNeighbor = curWord;
+                }
             }
-
-            return Word.Empty;
+            //If we're between words, return the left-most word.
+            return leftNeighbor;
         }
 
         private Word[] EnumerateWords()
@@ -278,11 +283,11 @@ namespace Hourglass.Terminal.Input
             {
                 return input;
             }
-            if (endIndex >= input.Length - 1)
+            if (endIndex >= input.Length - 2)
             {
                 return input.Remove(startIndex);
             }
-            return input.Remove(startIndex) + input.Substring(endIndex);
+            return input.Remove(startIndex) + input.Substring(endIndex + 1);
         }
 
         private struct Word

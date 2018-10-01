@@ -45,7 +45,7 @@ namespace Hourglass.Terminal.Interpreting
 
         public override string[] GetCompletionOptions(string firstWord, string word, int wordPosition)
         {
-            if (wordPosition > 0 && ResolveContextualCompletionCallback != null)
+            if (wordPosition > 1 && ResolveContextualCompletionCallback != null)
             {
                 var resolved = ResolveContextualCompletionCallback(firstWord, wordPosition);
                 if (resolved.Length != 1 || resolved[0] != DEFER_RESOLUTION)
