@@ -4,7 +4,7 @@ using System;
 
 namespace Hourglass.Terminal.Rendering
 {
-    internal class MonoGameRenderer : RenderManager
+    public class MonoGameRenderer : RenderManager
     {
         public override bool Enabled { get; set; }
         public int OutputLines { get; set; }

@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -42,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Interpreting\CommandInterpreter.cs" />
+    <Compile Include="Interpreting\EnvironmentContextualCompletionResolverAttribute.cs" />
     <Compile Include="Interpreting\EnvironmentItemAttribute.cs" />
     <Compile Include="Interpreting\Interpreter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

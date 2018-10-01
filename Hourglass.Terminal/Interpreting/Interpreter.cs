@@ -9,11 +9,15 @@ namespace Hourglass.Terminal.Interpreting
 {
     public delegate void OnSetEnvironmentValue(string key, object value);
     public delegate object OnGetEnvironmentValue(string key, out bool success);
-    
+    public delegate string[] OnResolveContextualCompletion(string command, int argIndex);
+
     public abstract class Interpreter
     {
-        public OnSetEnvironmentValue SetEnvironmentValue { get; set; }
-        public OnGetEnvironmentValue GetenvironmentValue { get; set; }
+        public const string DEFER_RESOLUTION = "!@#DEFER#@!";
+        
+        public OnSetEnvironmentValue SetEnvironmentValue;
+        public OnGetEnvironmentValue GetenvironmentValue;
+        public OnResolveContextualCompletion ResolveContextualCompletionCallback;
 
         protected object _environment;
         protected Type _environmentType;
@@ -119,6 +123,7 @@ namespace Hourglass.Terminal.Interpreting
             bool GetName(MemberInfo input, out string name)
             {
                 var attribute = input.GetCustomAttribute<EnvironmentItemAttribute>();
+
                 if (attribute == null)
                 {
                     name = "";
@@ -137,9 +142,14 @@ namespace Hourglass.Terminal.Interpreting
             {
                 if(!GetName(item, out var name))
                 {
+                    var attribute = item.GetCustomAttribute<EnvironmentContextualCompletionResolverAttribute>();
+                    if (attribute != null)
+                    {
+                        ResolveContextualCompletionCallback = (OnResolveContextualCompletion)item.CreateDelegate(typeof(OnResolveContextualCompletion), _environment);
+                    }
                     continue;
                 }
-                LoadEnvironmentFunction(item.CreateDelegate(_environment.GetType(), _environment), name);
+                LoadEnvironmentFunction(CreateDelegate(item, _environment), name);
             }
             foreach (var item in properties)
             {
@@ -177,10 +187,36 @@ namespace Hourglass.Terminal.Interpreting
         {
             _values.Add(name, new Value(name, field));
         }
+
+
+        //Source: https://stackoverflow.com/a/40579063
+        private Delegate CreateDelegate(MethodInfo methodInfo, object target)
+        {
+            Func<Type[], Type> getType;
+            var isAction = methodInfo.ReturnType.Equals((typeof(void)));
+            var types = methodInfo.GetParameters().Select(p => p.ParameterType);
+
+            if (isAction)
+            {
+                getType = Expression.GetActionType;
+            }
+            else
+            {
+                getType = Expression.GetFuncType;
+                types = types.Concat(new[] { methodInfo.ReturnType });
+            }
+
+            if (methodInfo.IsStatic)
+            {
+                return Delegate.CreateDelegate(getType(types.ToArray()), methodInfo);
+            }
+
+            return Delegate.CreateDelegate(getType(types.ToArray()), target, methodInfo.Name);
+        }
         
 
         public abstract void Execute(string code);
-        public abstract string[] GetCompletionOptions(string word);
+        public abstract string[] GetCompletionOptions(string firstWord, string word, int wordPosition);
         
 
         protected enum ValueSources
