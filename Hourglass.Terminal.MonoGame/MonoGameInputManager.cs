@@ -39,19 +39,20 @@ namespace Hourglass.Terminal.Input
             inputManager.KeyPressed += KeyPressed;
         }
 
-        public override string GetFirstWord()
+        public override Word GetFirstWord()
         {
             var words = EnumerateWords();
             if (words == null || words.Length == 0)
             {
-                return "";
+                return Word.Empty;
             }
-            return EnumerateWords()[0].Text;
+            return EnumerateWords()[0];
         }
 
-        public override string GetLastWord()
+        public override Word GetCurrentWord()
         {
-            return FindCurrentWord().Text;
+            return FindCurrentWord();
+            /*
             var words = EnumerateWords();
 
             for (int i = 0; i < words.Length; i++)
@@ -74,9 +75,10 @@ namespace Hourglass.Terminal.Input
                 word += _input[i];
             }
             return word;
+            */
         }
 
-        public override int GetLastWordPosition()
+        public override int GetCurrentWordPosition()
         {
             return FindCurrentWord().WordIndex;
             int wordPosition = 0;
@@ -99,7 +101,7 @@ namespace Hourglass.Terminal.Input
             _inputWatcher.ClearInput();
         }
 
-        public override void SetLastWord(string newWord)
+        public override void SetCurrentWord(string newWord)
         {
             var word = FindCurrentWord();
             
@@ -145,7 +147,7 @@ namespace Hourglass.Terminal.Input
             var words = EnumerateWords();
             if (_inputWatcher.CaretPosition >= _input.Length - 1 && words.Length > 0)
             {
-                return words.Last();
+              //  return words.Last();
             }
 
             var leftNeighbor = Word.Empty;
@@ -156,13 +158,24 @@ namespace Hourglass.Terminal.Input
                 {
                     return curWord;
                 }
-                else if(curWord.EndIndex < _inputWatcher.CaretPosition)
+                else if(curWord.StartIndex > _inputWatcher.CaretPosition)
+                {
+                    return curWord;
+                }
+                if (curWord.EndIndex < _inputWatcher.CaretPosition)
                 {
                     leftNeighbor = curWord;
                 }
             }
-            //If we're between words, return the left-most word.
+
+            if (_input.LastOrDefault() == ' ')
+            {
+                return new Word(_inputWatcher.CaretPosition, _inputWatcher.CaretPosition, words.Length + 1, "");
+            }
             return leftNeighbor;
+            //If we're between words, return the left-most word.
+           // return leftNeighbor;
+            return Word.Empty;
         }
 
         private Word[] EnumerateWords()
@@ -290,34 +303,5 @@ namespace Hourglass.Terminal.Input
             return input.Remove(startIndex) + input.Substring(endIndex + 1);
         }
 
-        private struct Word
-        {
-            public static Word Empty => new Word(0, 0, 0, "");
-
-            public int StartIndex { get; private set; }
-            public int EndIndex { get; private set; }
-            public int WordIndex { get; private set; }
-            public string Text { get; private set; }
-
-            public int Length => (EndIndex - StartIndex) + 1;
-
-            public Word(int startIndex, int endIndex, int wordIndex, string text)
-            {
-                StartIndex = startIndex;
-                EndIndex = endIndex;
-                WordIndex = wordIndex;
-                Text = text;
-            }
-
-            public bool ContainsIndex(int index)
-            {
-                return index >= StartIndex && index <= EndIndex;
-            }
-
-            public bool IsEmpty()
-            {
-                return StartIndex == -1 && EndIndex == -1 && WordIndex == -1 && Text == null;
-            }
-        }
     }
 }

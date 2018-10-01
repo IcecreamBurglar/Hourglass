@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\Word.cs" />
     <Compile Include="Interpreting\CommandInterpreter.cs" />
     <Compile Include="Interpreting\EnvironmentContextualCompletionResolverAttribute.cs" />
     <Compile Include="Interpreting\EnvironmentItemAttribute.cs" />

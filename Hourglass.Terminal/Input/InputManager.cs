@@ -28,10 +28,10 @@ namespace Hourglass.Terminal.Input
         public abstract void ResetTextInput();
 
         public abstract void SetTextInput(string newInput);
-        public abstract void SetLastWord(string newWord);
-        public abstract string GetFirstWord();
-        public abstract string GetLastWord();
-        public abstract int GetLastWordPosition();
+        public abstract void SetCurrentWord(string newWord);
+        public abstract Word GetFirstWord();
+        public abstract Word GetCurrentWord();
+        public abstract int GetCurrentWordPosition();
         public abstract int GetCaretPosition();
 
         protected void RaiseTextChanged(ref string textInput)

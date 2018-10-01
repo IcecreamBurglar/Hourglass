@@ -145,7 +145,7 @@ namespace Hourglass.Input
         public void SetInput(string input)
         {
             int position = _caretPosition;
-            if (position >= input.Length)
+            if (position >= input.Length || position >= _input.Length)
             {
                 position = input.Length;
             }
