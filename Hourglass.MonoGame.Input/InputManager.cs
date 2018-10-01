@@ -104,6 +104,7 @@ namespace Hourglass.Input
             {
                 //TODO: Error
             }
+
             TextWatchers[textWatcher].TextChanged -= callback;
         }
 

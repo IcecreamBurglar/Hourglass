@@ -12,11 +12,13 @@ namespace Hourglass.Terminal.Interpreting
     public delegate void OnCommandNotFound(string commandName);
     public delegate void OnOutput(string value);
 
+
     public class CommandInterpreter : Interpreter
     {
         public event OnBadCommand BadCommand;
         public event OnCommandNotFound CommandNotFound;
         public event OnOutput Output;
+
 
         public CommandInterpreter()
         {
@@ -41,8 +43,17 @@ namespace Hourglass.Terminal.Interpreting
             }
         }
 
-        public override string[] GetCompletionOptions(string word)
+        public override string[] GetCompletionOptions(string firstWord, string word, int wordPosition)
         {
+            if (wordPosition > 0 && ResolveContextualCompletionCallback != null)
+            {
+                var resolved = ResolveContextualCompletionCallback(firstWord, wordPosition);
+                if (resolved.Length != 1 || resolved[0] != DEFER_RESOLUTION)
+                {
+                    return resolved;
+                }
+            }
+
             var results = new List<string>();
             word = word.ToLower();
             foreach (var item in _functions)

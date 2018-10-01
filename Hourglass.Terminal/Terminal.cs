@@ -124,7 +124,7 @@ namespace Hourglass.Terminal
             EchoColor = (255, 255, 255, 255);
             EchoBackColor = (192, 192, 192, 255);
 
-            InputColor = (255, 255, 255, 255);
+            InputColor = (0, 0, 0, 255);
             InputBackColor = (255, 255, 0, 255);
 
             InputContinuation = "->";
@@ -377,7 +377,13 @@ namespace Hourglass.Terminal
             if(_completionOptions.Count == 0)
             {
                 string word = InputManager.GetLastWord();
-                _completionOptions.AddRange(Interpreter.GetCompletionOptions(word));
+                if (word == null)
+                {
+                    word = "";
+                }
+                int wordPosition = InputManager.GetLastWordPosition();
+                var firstWord = InputManager.GetFirstWord();
+                _completionOptions.AddRange(Interpreter.GetCompletionOptions(firstWord, word, wordPosition));
             }
             if (_completionOptions.Count > 0)
             {
