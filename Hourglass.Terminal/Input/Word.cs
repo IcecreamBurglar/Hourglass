@@ -32,7 +32,7 @@ namespace Hourglass.Terminal.Input
 
         public bool IsEmpty()
         {
-            return StartIndex == -1 && EndIndex == -1 && WordIndex == -1 && Text == null;
+            return StartIndex == 0 && EndIndex == 0 && WordIndex == 0 && Text == "";
         }
     }
 }

@@ -395,6 +395,7 @@ namespace Hourglass.Terminal
             {
                 _lastCompletion = _completionOptions[_completionOptionIndex];
                 InputManager.SetCurrentWord(_completionOptions[_completionOptionIndex]);
+                _completionWordPosition = InputManager.GetCurrentWordPosition();
                 _completionOptionIndex++;
                 if (_completionOptionIndex >= _completionOptions.Count)
                 {

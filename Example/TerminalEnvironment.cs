@@ -39,6 +39,12 @@ namespace Example
         }
 
         [EnvironmentItem]
+        private void Great()
+        {
+            TerminalService.Terminal.Write($"Hello");
+        }
+
+        [EnvironmentItem]
         private void SetColor(string colorName)
         {
             Color color = Color.CornflowerBlue;
