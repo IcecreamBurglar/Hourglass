@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\TerminalInputProvider.cs" />
     <Compile Include="Input\Word.cs" />
     <Compile Include="Interpreting\CommandInterpreter.cs" />
     <Compile Include="Interpreting\EnvironmentContextualCompletionResolverAttribute.cs" />

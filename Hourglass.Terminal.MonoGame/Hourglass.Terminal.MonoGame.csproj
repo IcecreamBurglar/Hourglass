@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MonoGameInputManager.cs" />
+    <Compile Include="MonoGameInputProvider.cs" />
     <Compile Include="MonoGameRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
