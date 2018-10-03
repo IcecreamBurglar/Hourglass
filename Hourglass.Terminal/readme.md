@@ -100,7 +100,23 @@ Then, if the user has the following currently input into the terminal "Greet " a
 the terminal will cycle through the string array {"Bob", "Jill"}. But of course the user could still input
 any string they wanted. By the way, `Interpreter.DEFER_RESOLUTION` is a wacky
 string constant denoting that you'd prefer the interpreter decide what to do. And to take an educated guess,
-it probably won't really do anything maybe.)
+it probably won't really do anything maybe.) \
+ \
+Non-primitive types are supported through a syntax of "(255, 255, 255)". So for an example:
+```cs
+[EnvironmentItem]
+private void SetPosition(Vector2 pos)
+{
+   //...
+}
+```
+`SetPosition "(10.0, 9)"` \
+Remember to surround such an argument within quotes, other wise it would be parsed as 2 different arguments
+in this example. \
+It might also be worth mentioning that you can nest such arguments, if need-be. When nested,
+the quotes aren't needed. An example: \
+`SetSomething "(Dog, (120, abc), Cat)"
+
 
 ## Conclusion
 OK, so that's the basic rundown. \
