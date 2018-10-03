@@ -12,6 +12,7 @@ namespace Hourglass.Terminal.Rendering
         public SpriteFont Font { get; private set; }
         public Texture2D Background { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
+        //TODO: Add prompt property
 
         public int Index
         {

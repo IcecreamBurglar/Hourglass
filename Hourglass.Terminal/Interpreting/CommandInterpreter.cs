@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Hourglass.Terminal.Interpreting
 {
-    //TODO: Implement optional arguments.
-
     public delegate void OnBadCommand(string message, string commandName);
     public delegate void OnCommandNotFound(string commandName);
     public delegate void OnOutput(string value);
@@ -23,6 +21,8 @@ namespace Hourglass.Terminal.Interpreting
 
     public class CommandInterpreter : Interpreter
     {
+        public const string DEFER_RESOLUTION = "!@#DEFER#@!";
+
         public event OnBadCommand BadCommand;
         public event OnCommandNotFound CommandNotFound;
         public event OnOutput Output;
@@ -75,7 +75,7 @@ namespace Hourglass.Terminal.Interpreting
                 {
                     continue;
                 }
-                if (string.IsNullOrWhiteSpace(word))
+                if (String.IsNullOrWhiteSpace(word))
                 {
                     results.Add(item.Key);
                     continue;
@@ -85,6 +85,7 @@ namespace Hourglass.Terminal.Interpreting
                     results.Add(item.Key);
                 }
             }
+            //TODO: Use Values as well.
             return results.ToArray();
         }
 
@@ -115,7 +116,7 @@ namespace Hourglass.Terminal.Interpreting
         {
             failed = true;
 
-            int highestScore = int.MinValue;
+            int highestScore = Int32.MinValue;
             object[] matchingArgs = new object[0];
             Delegate matchingDelegate = null;
             bool ambiguousCandidates = false;
@@ -261,7 +262,7 @@ namespace Hourglass.Terminal.Interpreting
                     }
                     catch
                     {
-                        score = int.MinValue;
+                        score = Int32.MinValue;
                         break;
                     }
                 }
@@ -328,7 +329,7 @@ namespace Hourglass.Terminal.Interpreting
 
             void AddArg()
             {
-                if (string.IsNullOrWhiteSpace(curArg) && !quoted)
+                if (String.IsNullOrWhiteSpace(curArg) && !quoted)
                 {
                     return;
                 }
@@ -387,57 +388,57 @@ namespace Hourglass.Terminal.Interpreting
             //Integer Types
             if (primitiveType == typeof(long))
             {
-                return long.Parse(input);
+                return Int64.Parse(input);
             }
             else if (primitiveType == typeof(ulong))
             {
-                return ulong.Parse(input);
+                return UInt64.Parse(input);
             }
             else if (primitiveType == typeof(int))
             {
-                return int.Parse(input);
+                return Int32.Parse(input);
             }
             else if (primitiveType == typeof(uint))
             {
-                return uint.Parse(input);
+                return UInt32.Parse(input);
             }
             else if (primitiveType == typeof(short))
             {
-                return short.Parse(input);
+                return Int16.Parse(input);
             }
             else if (primitiveType == typeof(ushort))
             {
-                return ushort.Parse(input);
+                return UInt16.Parse(input);
             }
             else if (primitiveType == typeof(byte))
             {
-                return byte.Parse(input);
+                return Byte.Parse(input);
             }
             else if (primitiveType == typeof(sbyte))
             {
-                return sbyte.Parse(input);
+                return SByte.Parse(input);
             }
             //Floating-Point Types
             else if (primitiveType == typeof(decimal))
             {
-                return decimal.Parse(input);
+                return Decimal.Parse(input);
             }
             else if (primitiveType == typeof(double))
             {
-                return double.Parse(input);
+                return Double.Parse(input);
             }
             else if (primitiveType == typeof(float))
             {
-                return float.Parse(input);
+                return Single.Parse(input);
             }
             //Misc Types
             else if (primitiveType == typeof(bool))
             {
-                return bool.Parse(input);
+                return Boolean.Parse(input);
             }
             else if (primitiveType == typeof(char))
             {
-                return char.Parse(input);
+                return Char.Parse(input);
             }
 
             return input;
@@ -447,7 +448,7 @@ namespace Hourglass.Terminal.Interpreting
         {
             string[] paramStrings = FindArgsForCtor(input);
 
-            int highestScore = int.MinValue;
+            int highestScore = Int32.MinValue;
             object[] matchingArgs = null;
             ConstructorInfo matchingCtor = null;
 
