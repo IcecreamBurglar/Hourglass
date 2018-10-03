@@ -11,11 +11,11 @@ namespace Example
     class TerminalEnvironment
     {
         [EnvironmentContextualCompletionResolver]
-        public string[] Resolve(string command, int argIndex)
+        public string[] Resolve(string command, int argPos)
         {
             if (command == "Greet")
             {
-                if (argIndex == 2)
+                if (argPos == 2)
                 {
                     return new[] {"Bob", "John", "Geraldo", "Anne"};
                 }
@@ -23,13 +23,13 @@ namespace Example
             else if (command == "SetColor")
             {
 
-                if (argIndex == 2)
+                if (argPos == 2)
                 {
                     return new[] {"Red", "Green", "Blue"};
                 }
             }
 
-            return new []  {Interpreter.DEFER_RESOLUTION};
+            return new []  {CommandInterpreter.DEFER_RESOLUTION};
         }
 
         [EnvironmentItem]

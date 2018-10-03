@@ -32,8 +32,9 @@ namespace Example
             Interpreter = new CommandInterpreter();
             TerminalRenderer = new MonoGameRenderer(Assets.TerminalFont, Assets.PixelTexture, new SpriteBatch(graphicsDevice));
 
-            Terminal = new Terminal(graphicsDevice.PresentationParameters.BackBufferWidth,
+            Terminal = new Terminal(graphicsDevice.PresentationParameters.BackBufferWidth, "->",
                 new MonoGameInputProvider(_inputManager), TerminalRenderer, Interpreter);
+            Terminal.BlankLineExecution = true;
             
             Interpreter.SetEnvironment(Environment);
         }

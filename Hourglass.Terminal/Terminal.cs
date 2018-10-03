@@ -10,13 +10,18 @@ namespace Hourglass.Terminal
 {
     public class Terminal
     {
+        //TODO: Allow left/right input navigation across input lines
+        //TODO: Show some kind of indication about how many lines we're on.
+
         //The maximum number of pixels that can be on a line before wrapping to the next.
         public int MaxWidth { get; set; }
 
 
         //The string that denotes that we're continuing our input on a new line.
         public string InputContinuation { get; set; }
-
+        //Whether or not to wait until a blank line is input before executing.
+        public bool BlankLineExecution { get; set; }
+        //TODO: Support blank line continuation
 
         //The inputmanager from whence input comes.
         public TerminalInputProvider InputManager { get; private set; }
@@ -86,12 +91,10 @@ namespace Hourglass.Terminal
         //Tracks the position of the word we last resolved completions for.
         private int _completionWordPosition;
 
-        private bool _enabled;
+        //Whether not a new line has happened because the user put in a line-continuation.
+        private bool _isUserForcedMultline;
 
-        public Terminal(int width, Interpreter interpreter)
-            : this(width, "", TerminalInputProvider.Default, RenderManager.Default, interpreter)
-        {
-        }
+        private bool _enabled;
 
         public Terminal(int width, TerminalInputProvider inputManager, RenderManager renderManager, Interpreter interpreter)
             : this(width, "", inputManager, renderManager, interpreter)
@@ -284,6 +287,20 @@ namespace Hourglass.Terminal
             }
         }
 
+        private void WriteInputLine(string line)
+        {
+            var oldColor = OutputColor;
+            var oldBackColor = OutputBackColor;
+
+            OutputColor = InputColor;
+            OutputBackColor = InputBackColor;
+
+            Write("{0}{1}", EchoPrompt, line);
+
+            OutputColor = oldColor;
+            OutputBackColor = oldBackColor;
+        }
+
         private void WriteInput()
         {
             var oldColor = OutputColor;
@@ -310,14 +327,27 @@ namespace Hourglass.Terminal
             }
             if (_inputBuffer[lastIndex].EndsWith(InputContinuation))
             {
-                //_inputBuffer[lastIndex] = _inputBuffer[lastIndex]
-                //                                    .Remove(_inputBuffer[lastIndex]
-                //                                        .IndexOf(InputContinuation[0])) + Environment.NewLine;
-                
-                //WriteEcho(_inputBuffer[lastIndex]);
-                InputManager.ResetTextInput();
-                _inputBuffer.Add("");
+                _isUserForcedMultline = true;
+                string text = _inputBuffer[lastIndex];
+                WriteInputLine(text);
+                NewInputLine(text);
                 return;
+            }
+
+            if (BlankLineExecution)
+            {
+                string text = _inputBuffer[lastIndex];
+                if (!string.IsNullOrEmpty(text))
+                {
+                    _isUserForcedMultline = true;
+                    WriteInputLine(text);
+                    NewInputLine(text);
+                    return;
+                }
+                else
+                {
+                    _inputBuffer.RemoveAt(_inputBuffer.Count - 1);
+                }
             }
 
             string input = "";
@@ -333,13 +363,21 @@ namespace Hourglass.Terminal
             }
             input = input.Trim();
 
-            WriteInput();
+            if (!_isUserForcedMultline)
+            {
+                WriteInput();
+            }
+            else
+            {
+                WriteInputLine(_inputBuffer.Last());
+            }
 
             Interpreter.Execute(input);
 
             _inputBuffer.Clear();
             _inputBuffer.Add("");
             InputManager.ResetTextInput();
+            _isUserForcedMultline = false;
         }
 
         private void OnInputChanged(ref string textInput)
@@ -356,10 +394,7 @@ namespace Hourglass.Terminal
             var curIndex = LastInputIndex();
             if (width >= MaxWidth)
             {
-                _inputBuffer[curIndex] = textInput + InputContinuation;
-                _inputBuffer.Add("");
-                curIndex++;
-                InputManager.ResetTextInput();
+                NewInputLine(textInput);
             }
             else
             {
@@ -372,6 +407,14 @@ namespace Hourglass.Terminal
                     _inputBuffer[curIndex] = textInput;
                 }
             }
+        }
+
+        private void NewInputLine(string oldLine)
+        {
+            var curIndex = LastInputIndex();
+            _inputBuffer[curIndex] = oldLine + InputContinuation;
+            _inputBuffer.Add("");
+            InputManager.ResetTextInput();
         }
 
         private void OnAutoComplete()

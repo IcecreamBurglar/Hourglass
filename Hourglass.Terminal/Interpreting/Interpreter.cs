@@ -13,8 +13,6 @@ namespace Hourglass.Terminal.Interpreting
 
     public abstract class Interpreter
     {
-        public const string DEFER_RESOLUTION = "!@#DEFER#@!";
-        
         public OnSetEnvironmentValue SetEnvironmentValue;
         public OnGetEnvironmentValue GetenvironmentValue;
         public OnResolveContextualCompletion ResolveContextualCompletionCallback;
