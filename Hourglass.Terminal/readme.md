@@ -1,5 +1,5 @@
 # The Terminal's Dependencies
-This extensible terminal has been tucked away behind a couple layers of abstraction. \
+This extensible terminal has been tucked away behind a couple layers of abstraction.
  * The Interpeter 
    + Execution of input
    + Hosts the *Terminal Environment*
@@ -106,7 +106,7 @@ it probably won't really do anything maybe.)
 OK, so that's the basic rundown. \
 If you find an issue, please report it! \
 If you have questions/comments, please file an issue! \
-If you modify/add to the source, please submit a PR! \
+If you modify/add to the source, please submit a PR!
 
 
 # Extending
