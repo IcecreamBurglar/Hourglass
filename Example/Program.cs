@@ -8,6 +8,7 @@ namespace Example
     /// </summary>
     public static class Program
     {
+        delegate (string, int) del();
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -16,6 +17,11 @@ namespace Example
         {
             using (var game = new Game1())
                 game.Run();
+        }
+
+        static (string, int) test()
+        {
+            return ("", 0);
         }
     }
 #endif

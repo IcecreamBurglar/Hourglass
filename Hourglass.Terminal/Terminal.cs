@@ -83,6 +83,8 @@ namespace Hourglass.Terminal
         private List<string> _completionOptions;
         private int _completionOptionIndex;
         private string _lastCompletion;
+        //Tracks the position of the word we last resolved completions for.
+        private int _completionWordPosition;
 
         private bool _enabled;
 
@@ -133,8 +135,9 @@ namespace Hourglass.Terminal
             _historyIndex = -1;
 
             _completionOptions = new List<string>();
-            _completionOptionIndex = 0;
+            _completionOptionIndex = -1;
             _lastCompletion = "";
+            _completionWordPosition = -1;
 
             _enabled = false;
         }
@@ -371,24 +374,28 @@ namespace Hourglass.Terminal
             }
         }
 
-
         private void OnAutoComplete()
         {
-            if(_completionOptions.Count == 0)
+            var curWord = InputManager.GetCurrentWord();
+            int curWordPosition = curWord.WordIndex;
+            if (_completionWordPosition != curWordPosition)
             {
-                string word = InputManager.GetLastWord();
-                if (word == null)
-                {
-                    word = "";
-                }
-                int wordPosition = InputManager.GetLastWordPosition();
+                _completionOptions.Clear();
+            }
+
+            if (_completionOptions.Count == 0)
+            {
                 var firstWord = InputManager.GetFirstWord();
-                _completionOptions.AddRange(Interpreter.GetCompletionOptions(firstWord, word, wordPosition));
+                _completionOptions.AddRange(Interpreter.GetCompletionOptions(firstWord.Text, curWord.Text, curWordPosition));
+                _completionWordPosition = curWordPosition;
+                //TODO: Create a lookup table recalling words and the completion indices for those words.
+                _completionOptionIndex = 0;
             }
             if (_completionOptions.Count > 0)
             {
                 _lastCompletion = _completionOptions[_completionOptionIndex];
-                InputManager.SetLastWord(_completionOptions[_completionOptionIndex]);
+                InputManager.SetCurrentWord(_completionOptions[_completionOptionIndex]);
+                _completionWordPosition = InputManager.GetCurrentWordPosition();
                 _completionOptionIndex++;
                 if (_completionOptionIndex >= _completionOptions.Count)
                 {

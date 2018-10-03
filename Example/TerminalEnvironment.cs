@@ -39,6 +39,18 @@ namespace Example
         }
 
         [EnvironmentItem]
+        private void Greet(string who, int age = 20)
+        {
+            TerminalService.Terminal.Write($"Hello, {who} @ age {age}!");
+        }
+
+        [EnvironmentItem]
+        private void Great()
+        {
+            TerminalService.Terminal.Write($"Hello");
+        }
+
+        [EnvironmentItem]
         private void SetColor(string colorName)
         {
             Color color = Color.CornflowerBlue;
@@ -56,5 +68,29 @@ namespace Example
             }
             Game1.Instance.ClearColor = color;
         }
+
+        [EnvironmentItem]
+        private void SetColor(Color color)
+        {
+            Game1.Instance.ClearColor = color;
+        }
+
+        [EnvironmentItem]
+        private void Blah(TestStruct color)
+        {
+        }
     }
+
+    public struct TestStruct
+    {
+        public Color Testcolor;
+        public int Age;
+
+        public TestStruct(int age, Color c)
+        {
+            Testcolor = c;
+            Age = age;
+        }
+    }
+
 }

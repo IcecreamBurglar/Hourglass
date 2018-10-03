@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,15 +14,27 @@ namespace Hourglass.Terminal.Interpreting
     public delegate void OnOutput(string value);
 
 
+    public enum AmbiguousParamRules
+    {
+        FavorExplicit,
+        FavorImplicit,
+        Error,
+    }
+
     public class CommandInterpreter : Interpreter
     {
         public event OnBadCommand BadCommand;
         public event OnCommandNotFound CommandNotFound;
         public event OnOutput Output;
 
+        public bool AllowAmbiguousExecution { get; set; }
+        public AmbiguousParamRules AmbiguousParamRules { get; set; }
+
 
         public CommandInterpreter()
         {
+            AllowAmbiguousExecution = true;
+            AmbiguousParamRules = AmbiguousParamRules.FavorExplicit;
         }
 
         public override void Execute(string code)
@@ -94,35 +107,177 @@ namespace Hourglass.Terminal.Interpreting
                 return null;
             }
 
-            var candidates = _functions[signature.Name].Where((a) => a.Method.GetParameters().Length == signature.Args.Length);
-            
-            if (!candidates.Any())
+
+            return Invoke(signature.Name, _functions[signature.Name], signature.Args, out failed);
+        }
+
+        private object Invoke(string commandName, IEnumerable<Delegate> candidates, string[] args, out bool failed)
+        {
+            failed = true;
+
+            int highestScore = int.MinValue;
+            object[] matchingArgs = new object[0];
+            Delegate matchingDelegate = null;
+            bool ambiguousCandidates = false;
+
+            foreach (var candidate in candidates)
             {
-                CommandNotFound?.Invoke(signature.Name);
-                return null;
+                var parameters = candidate.Method.GetParameters();
+                if (parameters.Length != args.Length)
+                {
+                    //continue;
+                }
+                int curScore = GetMatchScore(parameters, args, ref matchingArgs);
+                if (curScore > highestScore)
+                {
+                    matchingDelegate = candidate;
+                    highestScore = curScore;
+                }
+                else if (curScore == highestScore)
+                {
+                    ambiguousCandidates = true;
+                    matchingDelegate = candidate;
+                    if (!AllowAmbiguousExecution)
+                    {
+                        break;
+                    }
+                }
             }
 
-            candidates = TrimCandidates(candidates, signature.Args);
-            if (candidates.Count() > 1)
+
+            if (matchingDelegate == null)
             {
-                BadCommand?.Invoke("Ambiguous command specified.", signature.Name);
+                CommandNotFound?.Invoke(commandName);
+                return null;
+            }
+            if (!AllowAmbiguousExecution && ambiguousCandidates)
+            {
+                BadCommand?.Invoke("Ambiguous command specified.", commandName);
                 return null;
             }
 
             failed = false;
-            return Call(candidates.ElementAt(0), signature.Name, signature.Args);
+            return Call(matchingDelegate, matchingArgs);
         }
 
-        private IEnumerable<Delegate> TrimCandidates(IEnumerable<Delegate> input, string[] args)
+
+        private int GetMatchScore(ParameterInfo[] parameters, string[] args, ref object[] parsedArgs)
         {
-            //TODO: Argument type inference
-            List<Delegate> output = new List<Delegate>();
-            output.AddRange(input);
-            return output;
+            int score = 0;
+            if (parameters.Length < args.Length)
+            {
+                return 0;
+            }
+            List<object> argValues = new List<object>();
+
+            void AddArgValue(object value, int points)
+            {
+                argValues.Add(value);
+                score += points;
+            }
+
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var curParam = parameters[i];
+                if (i >= args.Length)
+                {
+                    if (curParam.HasDefaultValue)
+                    {
+                        int bonus = 0;
+                        if (AmbiguousParamRules == AmbiguousParamRules.FavorImplicit)
+                        {
+                            bonus += 4;
+                        }
+                        else if (AmbiguousParamRules == AmbiguousParamRules.FavorExplicit)
+                        {
+                            bonus -= 1;
+                        }
+                        AddArgValue(curParam.DefaultValue, bonus);
+                    }
+                    continue;
+                }
+
+                string curArg = args[i];
+                object value = null;
+                if (ContainsValue(curArg))
+                {
+                    value = GetValue(curArg, out bool success);
+                    if (success)
+                    {
+                        if (value.GetType() == curParam.ParameterType || curParam.ParameterType.IsInstanceOfType(value))
+                        {
+                            AddArgValue(value, 4);
+                            continue;
+                        }
+                        curArg = value.ToString();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                if (curParam.ParameterType.IsEnum)
+                {
+                    var enumNames = Enum.GetNames(curParam.ParameterType);
+                    if (enumNames.Contains(curArg))
+                    {
+                        AddArgValue(Enum.Parse(curParam.ParameterType, curArg, true), 4);
+                        continue;
+                    }
+                }
+
+                int typeBonus = 1;
+                object argValue = null;
+                if (curParam.ParameterType == typeof(string))
+                {
+                    typeBonus = 3;
+                    argValue = curArg; //ParsePrimitive(curParam.ParameterType, curArg);
+                }
+                else if (curParam.ParameterType == typeof(float) ||
+                         curParam.ParameterType == typeof(double) ||
+                         curParam.ParameterType == typeof(decimal) ||
+                         curParam.ParameterType == typeof(bool))
+                {
+                    typeBonus = 2;
+                    argValue = ParsePrimitive(curParam.ParameterType, curArg);
+                }
+                else if (curParam.ParameterType.IsPrimitive)
+                {
+                    typeBonus = 1;
+                }
+                else if(curArg.StartsWith("(") && curArg.EndsWith(")"))
+                {
+                    argValue = ParseType(curParam.ParameterType, curArg);
+                    typeBonus = 4;
+                }
+
+                if (argValue == null)
+                {
+                    try
+                    {
+                        argValue = Convert.ChangeType(curArg, curParam.ParameterType);
+                    }
+                    catch
+                    {
+                        score = int.MinValue;
+                        break;
+                    }
+                }
+                AddArgValue(argValue, typeBonus);
+            }
+
+            if (score > 0)
+            {
+                parsedArgs = argValues.ToArray();
+            }
+            return score;
         }
 
-        private object Call(Delegate address, string name, string[] args)
+        private object Call(Delegate address, object[] args)
         {
+            /*
             List<object> parsedArgs = new List<object>();
             var parameters = address.Method.GetParameters();
             for (int i = 0; i < parameters.Length; i++)
@@ -156,7 +311,8 @@ namespace Hourglass.Terminal.Interpreting
                     return "";
                 }
             }
-            return address.DynamicInvoke(parsedArgs.ToArray());
+            */
+            return address.DynamicInvoke(args);
         }
 
         private (string Name, string[] Args) SplitCommand(string command)
@@ -224,6 +380,153 @@ namespace Hourglass.Terminal.Interpreting
 
             AddArg();
             return (name, args.ToArray());
+        }
+
+        private object ParsePrimitive(Type primitiveType, string input)
+        {
+            //Integer Types
+            if (primitiveType == typeof(long))
+            {
+                return long.Parse(input);
+            }
+            else if (primitiveType == typeof(ulong))
+            {
+                return ulong.Parse(input);
+            }
+            else if (primitiveType == typeof(int))
+            {
+                return int.Parse(input);
+            }
+            else if (primitiveType == typeof(uint))
+            {
+                return uint.Parse(input);
+            }
+            else if (primitiveType == typeof(short))
+            {
+                return short.Parse(input);
+            }
+            else if (primitiveType == typeof(ushort))
+            {
+                return ushort.Parse(input);
+            }
+            else if (primitiveType == typeof(byte))
+            {
+                return byte.Parse(input);
+            }
+            else if (primitiveType == typeof(sbyte))
+            {
+                return sbyte.Parse(input);
+            }
+            //Floating-Point Types
+            else if (primitiveType == typeof(decimal))
+            {
+                return decimal.Parse(input);
+            }
+            else if (primitiveType == typeof(double))
+            {
+                return double.Parse(input);
+            }
+            else if (primitiveType == typeof(float))
+            {
+                return float.Parse(input);
+            }
+            //Misc Types
+            else if (primitiveType == typeof(bool))
+            {
+                return bool.Parse(input);
+            }
+            else if (primitiveType == typeof(char))
+            {
+                return char.Parse(input);
+            }
+
+            return input;
+        }
+
+        private object ParseType(Type expectedType, string input)
+        {
+            string[] paramStrings = FindArgsForCtor(input);
+
+            int highestScore = int.MinValue;
+            object[] matchingArgs = null;
+            ConstructorInfo matchingCtor = null;
+
+            foreach (var candidate in expectedType.GetConstructors())
+            {
+                var parameters = candidate.GetParameters();
+                if (parameters.Length != paramStrings.Length)
+                {
+                    //continue;
+                }
+                matchingArgs = new object[paramStrings.Length];
+                int curScore = GetMatchScore(parameters, paramStrings, ref matchingArgs);
+                if (curScore >= highestScore)
+                {
+                    matchingCtor = candidate;
+                    highestScore = curScore;
+                }
+            }
+
+            if (matchingCtor == null)
+            {
+                //TODO: Error out here
+            }
+
+            return Activator.CreateInstance(expectedType, matchingArgs);
+        }
+
+        private string[] FindArgsForCtor(string input)
+        {
+            if (input.StartsWith("("))
+            {
+                input = input.Remove(0, 1);
+            }
+
+            if (input.EndsWith(")"))
+            {
+                input = input.Remove(input.Length - 1, 1);
+            }
+
+            var curItemBuilder = new StringBuilder();
+            List<string> result = new List<string>();
+            bool inSubValue = false;
+            for (int i = 0; i < input.Length; i++)
+            {
+                var curChar = input[i];
+                if (curChar == '(')
+                {
+                    inSubValue = true;
+                }
+                else if (curChar == ')')
+                {
+                    inSubValue = false;
+                    curItemBuilder.Append(curChar);
+                    result.Add(curItemBuilder.ToString().Trim());
+                    curItemBuilder.Clear();
+
+                    continue;
+                }
+                else if (curChar == ' ' && !inSubValue && curItemBuilder.ToString().Length > 0)
+                {
+                    result.Add(curItemBuilder.ToString().Trim());
+                    curItemBuilder.Clear();
+                    continue;
+                }
+
+                if (curChar == ',')
+                {
+                    continue;
+                }
+                curItemBuilder.Append(curChar);
+            }
+
+            if (curItemBuilder.ToString().Length > 0)
+            {
+                result.Add(curItemBuilder.ToString().Trim());
+            }
+
+
+            return result.ToArray();
         }
     }
 }
