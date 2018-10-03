@@ -1,6 +1,6 @@
 # The Terminal's Dependencies
 This extensible terminal has been tucked away behind a couple layers of abstraction. \
- * The Interpeter \
+ * The Interpeter 
    + Execution of input
    + Hosts the *Terminal Environment*
  * The RenderManager
@@ -62,6 +62,7 @@ a command name to use. If no command name is specified, the name of the function
 available:
  *  Any number of parameters for commands
  *  Any type of parameter is possible
+ *  Optional parameters are legal
  *  Command overloading
  *  *Contextual Auto Completion Resolution* (actually partially im feature of the abstract super-class *Interpreter*)
 OK, so that last one might stand out. All it means is that the author of the environment can specify the options
