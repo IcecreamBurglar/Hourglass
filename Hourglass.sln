@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hourglass.Input", "Hourglas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{3A7395FB-E1FC-47F2-80B1-B57FF3A89329}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hourglass.ImLoader", "Hourglass.ImLoader\Hourglass.ImLoader.csproj", "{5AEDB066-9657-44CE-B66D-E92DEF61C64E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,14 @@ Global
 		{3A7395FB-E1FC-47F2-80B1-B57FF3A89329}.Release|Any CPU.ActiveCfg = Release|x86
 		{3A7395FB-E1FC-47F2-80B1-B57FF3A89329}.Release|x86.ActiveCfg = Release|x86
 		{3A7395FB-E1FC-47F2-80B1-B57FF3A89329}.Release|x86.Build.0 = Release|x86
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Debug|x86.Build.0 = Debug|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Release|x86.ActiveCfg = Release|Any CPU
+		{5AEDB066-9657-44CE-B66D-E92DEF61C64E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
