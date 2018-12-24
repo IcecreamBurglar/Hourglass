@@ -50,9 +50,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Hourglass.MonoGame.Input\Hourglass.MonoGame.Input.csproj">
+    <ProjectReference Include="..\Hourglass.MonoGame.Input\Hourglass.Input.csproj">
       <Project>{596f8329-00e9-4ba7-93ce-4b9f8391cea0}</Project>
-      <Name>Hourglass.MonoGame.Input</Name>
+      <Name>Hourglass.Input</Name>
     </ProjectReference>
     <ProjectReference Include="..\Hourglass.Terminal\Hourglass.Terminal.csproj">
       <Project>{89666706-d6ac-4e10-b25f-2ce5f11d81f5}</Project>
