@@ -67,10 +67,6 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Hourglass.Ecs\Hourglass.Ecs.csproj">
-      <Project>{4c0b454c-d293-4546-a6bd-8c4d0180dbbf}</Project>
-      <Name>Hourglass.Ecs</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Hourglass.MonoGame.Input\Hourglass.MonoGame.Input.csproj">
       <Project>{596f8329-00e9-4ba7-93ce-4b9f8391cea0}</Project>
       <Name>Hourglass.MonoGame.Input</Name>
